@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from employee.models import Employee
+from employee.models import Employee,Student
 
 
 class EmployeeSerializers(serializers.HyperlinkedModelSerializer):
@@ -11,4 +11,16 @@ class EmployeeSerializers(serializers.HyperlinkedModelSerializer):
             'phone',
             'email',
             'url'
+        )
+
+
+class StudnetSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = (
+            'id',
+            'first_name',
+            'last_name',
+            'phone',
+            'email',
         )

@@ -7,7 +7,10 @@ router = routers.DefaultRouter()
 router.register('', EmployeeViewSet)
 
 urlpatterns = [
-    path('employee/',include(router.urls))
+    path('employee/',include(router.urls)),
+    path('student/',student),
+    path('student/<int:id>',student_details)
+
 
  ]
 
