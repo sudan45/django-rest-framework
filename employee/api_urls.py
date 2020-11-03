@@ -9,7 +9,10 @@ router.register('', EmployeeViewSet)
 urlpatterns = [
     path('employee/',include(router.urls)),
     path('student/',student),
-    path('student/<int:id>',student_details)
+    path('student/<id>/',student_details),
+    path('studnetcb/',StudentAPI.as_view()),
+    path('studnetcb/<int:id>/',Student_Details.as_view())
+
 
 
  ]
