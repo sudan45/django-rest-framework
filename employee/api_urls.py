@@ -11,9 +11,7 @@ urlpatterns = [
     path('student/',student),
     path('student/<id>/',student_details),
     path('studnetcb/',StudentAPI.as_view()),
-    path('studnetcb/<int:id>/',Student_Details.as_view())
-
-
-
- ]
+    path('studnetcb/<int:id>/',Student_Details.as_view()),
+    path('genericapi',ApiGeneric.as_view())
+]
 

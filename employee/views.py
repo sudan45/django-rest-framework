@@ -7,6 +7,9 @@ from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import mixins
+from rest_framework import generics
+
 
 
 # Create your views here.
@@ -22,8 +25,6 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     serializer_class = EmployeeSerializers
 
 # function based api
-
-
 @csrf_exempt
 def student(request):
     if request.method == 'GET':
@@ -106,3 +107,13 @@ class Student_Details(APIView):
         return Response(status=204)
 
 
+
+class ApiGeneric(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin):
+    serializer_class=StudnetSerializers
+    queryset=Student.objects.all()
+
+    def get(self,request):
+        return self.list(request)
+
+    def post(self,request):
+        return self.create(request)
