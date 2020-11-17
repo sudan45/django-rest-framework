@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import Employee, Student
 from rest_framework import viewsets
-from employee.serializers import EmployeeSerializers, StudnetSerializers
+from employee.serializers import EmployeeSerializers, StudnetSerializers, LoginSerializers
 from django.http import JsonResponse, HttpResponse
 from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
@@ -9,7 +9,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import mixins
 from rest_framework import generics
-
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
+from django.contrib.auth import login, logout
+from rest_framework.authtoken.models import Token
 
 
 # Create your views here.
@@ -25,6 +28,8 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     serializer_class = EmployeeSerializers
 
 # function based api
+
+
 @csrf_exempt
 def student(request):
     if request.method == 'GET':
@@ -107,13 +112,43 @@ class Student_Details(APIView):
         return Response(status=204)
 
 
+class ApiGeneric(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
+    serializer_class = StudnetSerializers
+    queryset = Student.objects.all()
+    lookup_field = 'id'
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
-class ApiGeneric(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin):
-    serializer_class=StudnetSerializers
-    queryset=Student.objects.all()
+    def get(self, request, id):
+        if id:
+            return self.retrieve(request, id)
+        else:
+            return self.list(request)
 
-    def get(self,request):
-        return self.list(request)
-
-    def post(self,request):
+    def post(self, request):
         return self.create(request)
+
+    def put(self, request, id):
+        return self.update(request, id)
+
+    def delete(self, request, id):
+        return self.destroy(request, id)
+
+
+class LoginView(APIView):
+    def post(self, request,*args,**kwargs):
+        serializer = LoginSerializers(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+        print(user)
+        login(request, user)
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({"token": token.key}, status=200)
+
+
+
+class LogoutView(APIView):
+    authentication_classes=(TokenAuthentication)
+    def post(self,request):
+        logout(request)
+        return Response(status=204)
