@@ -13,6 +13,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from django.contrib.auth import login, logout
 from rest_framework.authtoken.models import Token
+from rest_framework import viewsets
 
 
 # Create your views here.
@@ -136,7 +137,7 @@ class ApiGeneric(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateMo
 
 
 class LoginView(APIView):
-    def post(self, request,*args,**kwargs):
+    def post(self, request, *args, **kwargs):
         serializer = LoginSerializers(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
@@ -146,9 +147,53 @@ class LoginView(APIView):
         return Response({"token": token.key}, status=200)
 
 
-
 class LogoutView(APIView):
-    authentication_classes=(TokenAuthentication)
-    def post(self,request):
+    authentication_classes = (TokenAuthentication)
+
+    def post(self, request):
         logout(request)
         return Response(status=204)
+
+
+class Studentviewset(viewsets.ViewSet):
+    model = Student
+    queryset = Student.objects.all()
+    serializer_class = StudnetSerializers
+    lookup_field = 'id'
+
+    def list(self, request):
+        student = self.queryset
+        serializer = self.serializer_class(student, many=True)
+        return Response(serializer.data, status=200)
+
+    def create(self, request):
+        serializer=self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data={"msg":"Data has been created"})
+        else:
+            return Response(data={"msg":"Unable to create the data"},status=403)
+
+    def retrieve(self, request, id):
+        student = self.model.objects.get(id=id)
+        serializer = self.serializer_class(student)
+        return Response(serializer.data)
+
+    def update(self, request, id=None):
+        student=self.model.objects.get(id=id)
+        serializer=self.serializer_class(student,data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data={"msg":"Data has been created"})
+        else:
+            return Response(data={"msg":"Unable to update the data"},status=403)
+
+    def partial_update(self, request, id=None):
+        return Response(status=403, data={"msg": "API not allowed."})
+
+    def destroy(self, request, id=None):
+        student=self.model.objects.get(id=id)
+        student.delete()
+        return Response(data={"msg":"data is deleted "})
+
+ 
