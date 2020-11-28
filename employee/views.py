@@ -160,6 +160,8 @@ class Studentviewset(viewsets.ViewSet):
     queryset = Student.objects.all()
     serializer_class = StudnetSerializers
     lookup_field = 'id'
+    authentication_classes = (TokenAuthentication,)
+    permission_classes=(IsAuthenticated,)
 
     def list(self, request):
         student = self.queryset
@@ -197,3 +199,8 @@ class Studentviewset(viewsets.ViewSet):
         return Response(data={"msg":"data is deleted "})
 
  
+class StudentModelViewSet(viewsets.ModelViewSet):
+    queryset=Student.objects.all()
+    serializer_class=StudnetSerializers
+    authentication_classes = (TokenAuthentication,)
+    permission_classes=(IsAuthenticated,)
